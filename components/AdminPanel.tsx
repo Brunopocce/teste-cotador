@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../services/supabaseClient';
 import { UserProfile } from '../types';
@@ -16,6 +17,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
       .from('profiles')
       .select('*')
       .order('created_at', { ascending: false });
+
+    // Also fetch auth metadata to get the Plan if not in profiles table
+    // However, since we can't join auth.users easily from client, 
+    // we assume the data was saved to profiles (if column added) OR we accept it might be missing
+    // if only in metadata. Ideally, for admin view, data should be in the table.
+    
+    // NOTE: Since I cannot migrate the DB schema for you, the 'plan' field might not exist in the returned data 
+    // if you didn't add the column. 
 
     if (!error && data) {
       setUsers(data as UserProfile[]);
@@ -45,9 +54,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     return new Date(dateString).toLocaleString('pt-BR');
   };
 
+  const formatPlan = (plan?: string) => {
+      if (plan === 'monthly') return 'Mensal';
+      if (plan === 'quarterly') return 'Trimestral';
+      return '-';
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-[#003366]">Painel Administrativo</h1>
           <button 
@@ -72,6 +87,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                   <th className="p-4">Nome</th>
                   <th className="p-4">CPF</th>
                   <th className="p-4">Email / Telefone</th>
+                  <th className="p-4 text-center">Plano</th>
                   <th className="p-4 text-center">Status</th>
                   <th className="p-4 text-center">Ações</th>
                 </tr>
@@ -79,11 +95,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
                    <tr>
-                     <td colSpan={6} className="p-8 text-center text-gray-500">Carregando...</td>
+                     <td colSpan={7} className="p-8 text-center text-gray-500">Carregando...</td>
                    </tr>
                 ) : users.length === 0 ? (
                   <tr>
-                     <td colSpan={6} className="p-8 text-center text-gray-500">Nenhum cadastro encontrado.</td>
+                     <td colSpan={7} className="p-8 text-center text-gray-500">Nenhum cadastro encontrado.</td>
                    </tr>
                 ) : (
                   users.map(user => (
@@ -102,6 +118,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                            <span>{user.email}</span>
                            <span className="text-xs text-gray-400">{user.phone}</span>
                         </div>
+                      </td>
+                      <td className="p-4 text-center">
+                         <span className={`inline-block px-2 py-1 rounded text-xs font-bold uppercase
+                            ${user.plan === 'quarterly' ? 'bg-green-100 text-green-700' : 'bg-blue-50 text-blue-600'}
+                         `}>
+                            {formatPlan(user.plan)}
+                         </span>
                       </td>
                       <td className="p-4 text-center">
                         <span className={`inline-block px-2 py-1 rounded-full text-xs font-bold uppercase
