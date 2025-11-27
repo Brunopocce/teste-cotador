@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { MOCK_PLANS, AGE_RANGES } from './constants';
 import { AgeRange, UserSelection, CalculatedPlan, QuoteCategory, HealthPlan, UserProfile } from './types';
@@ -9,11 +8,12 @@ import { PriceSummaryTable } from './components/PriceSummaryTable';
 import { LoginScreen } from './components/LoginScreen';
 import { RegisterScreen } from './components/RegisterScreen';
 import { AdminPanel } from './components/AdminPanel';
+import { UpdatePasswordScreen } from './components/UpdatePasswordScreen';
 import { supabase } from './services/supabaseClient';
 
 // Updated steps to separate age input from results
 type AppStep = 'type-selection' | 'lives-selection' | 'age-input' | 'results';
-type AuthState = 'LOADING' | 'LOGIN' | 'REGISTER' | 'ADMIN' | 'PENDING' | 'REJECTED' | 'APP';
+type AuthState = 'LOADING' | 'LOGIN' | 'REGISTER' | 'ADMIN' | 'PENDING' | 'REJECTED' | 'UPDATE_PASSWORD' | 'APP';
 
 const App: React.FC = () => {
   // --- AUTH STATE ---
@@ -116,7 +116,9 @@ const App: React.FC = () => {
     checkUserSession();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'SIGNED_IN') {
+        if (event === 'PASSWORD_RECOVERY') {
+            setAuthState('UPDATE_PASSWORD');
+        } else if (event === 'SIGNED_IN') {
             if (session?.user) {
                 fetchUserProfile(session.user.id);
             }
@@ -264,6 +266,10 @@ const App: React.FC = () => {
 
   if (authState === 'LOADING') {
     return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-[#003366] font-bold">Carregando...</div>;
+  }
+  
+  if (authState === 'UPDATE_PASSWORD') {
+    return <UpdatePasswordScreen onPasswordUpdated={() => setAuthState('LOGIN')} />;
   }
 
   if (authState === 'ADMIN') {

@@ -1,4 +1,5 @@
 
+
 export enum AgeRange {
   RANGE_0_18 = '0-18',
   RANGE_19_23 = '19-23',
@@ -59,6 +60,6 @@ export interface UserProfile {
   cpf: string;
   phone: string;
   status: 'pending' | 'approved' | 'rejected';
-  plan?: 'monthly' | 'quarterly';
+  plan: 'monthly' | 'quarterly';
   created_at: string;
 }
