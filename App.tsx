@@ -323,31 +323,36 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-gray-50 pb-20 font-sans text-slate-800">
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-40 border-b border-blue-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 md:h-24 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 md:h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-end cursor-pointer group select-none" onClick={() => {
                setStep('type-selection');
                setQuoteCategory(null);
             }}>
-                <div className="flex items-center">
-                    <span className="text-4xl font-bold text-[#003366] tracking-tight">Venda Mais</span>
-                    <div className="mx-1 relative flex items-center justify-center h-10 w-10">
+                <div className="flex items-center gap-1 md:gap-2">
+                    {/* Venda */}
+                    <span className="text-xl md:text-3xl font-bold text-[#003366] tracking-tight">Venda</span>
+                    
+                    {/* Icon / + */}
+                    <div className="mx-0.5 md:mx-1 relative flex items-center justify-center h-6 w-6 md:h-9 md:w-9">
                         <div className="absolute inset-0 bg-[#003366] rounded opacity-10 transform rotate-45 transition-transform group-hover:rotate-90 duration-500"></div>
-                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 text-[#003366] z-10">
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 md:w-9 md:h-9 text-[#003366] z-10">
                            <path d="M19,3H5C3.9,3,3,3.9,3,5v14c0,1.1,0.9,2,2,2h14c1.1,0,2-0.9,2-2V5C21,3.9,20.1,3,19,3z M17,13h-3.5V16.5 c0,0.83-0.67,1.5-1.5,1.5s-1.5-0.67-1.5-1.5V13H7c-0.83,0-1.5-0.67-1.5-1.5S6.17,10,7,10h3.5V6.5C10.5,5.67,11.17,5,12,5 s1.5,0.67,1.5,1.5V10H17c0.83,0,1.5,0.67,1.5,1.5S17.83,13,17,13z"/>
                            <path fillOpacity="0.3" d="M12,8c-2.21,0-4,1.79-4,4s1.79,4,4,4s4-1.79,4-4S14.21,8,12,8z M12,14c-1.1,0-2-0.9-2-2s0.9-2,2-2s2,0.9,2,2 S13.1,14,12,14z"/>
                         </svg>
                     </div>
-                    <span className="text-5xl font-cursive text-[#003366] -ml-1 mt-2">Saúde</span>
+                    
+                    {/* Saúde */}
+                    <span className="text-2xl md:text-4xl font-cursive text-[#003366] mt-1">Saúde</span>
                 </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-             <button onClick={handleLogout} className="text-sm font-semibold text-gray-500 hover:text-red-600 transition-colors">
+             <button onClick={handleLogout} className="text-xs md:text-sm font-semibold text-gray-500 hover:text-red-600 transition-colors">
                 Sair
              </button>
-             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-[#003366] font-bold">
+             <div className="w-8 h-8 md:w-9 md:h-9 bg-blue-100 rounded-full flex items-center justify-center text-[#003366] font-bold text-sm md:text-base">
                 {currentUser?.full_name?.charAt(0) || 'U'}
              </div>
           </div>
