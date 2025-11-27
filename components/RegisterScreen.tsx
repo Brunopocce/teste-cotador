@@ -178,7 +178,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin, o
             <input 
               name="name" type="text" required
               value={formData.name} onChange={handleChange}
-              className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-gray-100 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+              className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-gray-100 text-gray-900 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all"
             />
           </div>
 
@@ -188,7 +188,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin, o
                 <input 
                 name="cpf" type="tel" required placeholder="000.000.000-00"
                 value={formData.cpf} onChange={handleChange}
-                className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-gray-100 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-gray-100 text-gray-900 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all"
                 />
              </div>
              <div>
@@ -196,7 +196,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin, o
                 <input 
                 name="phone" type="tel" required placeholder="(00) 00000-0000"
                 value={formData.phone} onChange={handleChange}
-                className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-gray-100 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-gray-100 text-gray-900 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all"
                 />
              </div>
           </div>
@@ -206,7 +206,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin, o
             <input 
               name="email" type="email" required
               value={formData.email} onChange={handleChange}
-              className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-gray-100 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+              className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-gray-100 text-gray-900 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all"
             />
           </div>
 
@@ -220,7 +220,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin, o
               required 
               maxLength={6}
               value={formData.password} onChange={handleChange}
-              className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-gray-100 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+              className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-gray-100 text-gray-900 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all"
             />
           </div>
 
