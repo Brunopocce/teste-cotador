@@ -305,7 +305,7 @@ const App: React.FC = () => {
 
   if (authState === 'PENDING') {
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
            <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md text-center">
               <div className="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8">
@@ -316,13 +316,16 @@ const App: React.FC = () => {
               <p className="text-gray-600 mb-6">Seu cadastro foi realizado com sucesso. Um administrador precisa liberar seu acesso.</p>
               <button onClick={handleLogout} className="text-blue-600 font-bold hover:underline">Voltar ao Login</button>
            </div>
+           <footer className="mt-8 text-gray-400 text-xs text-center">
+             <p>© 2025 Desenvolvido por Bruno Pocce. Todos os direitos reservados.</p>
+           </footer>
         </div>
     );
   }
 
   if (authState === 'REJECTED') {
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
            <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md text-center">
               <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8">
@@ -333,13 +336,16 @@ const App: React.FC = () => {
               <p className="text-gray-600 mb-6">Infelizmente seu cadastro não foi aprovado pelo administrador.</p>
               <button onClick={handleLogout} className="text-blue-600 font-bold hover:underline">Voltar ao Login</button>
            </div>
+           <footer className="mt-8 text-gray-400 text-xs text-center">
+             <p>© 2025 Desenvolvido por Bruno Pocce. Todos os direitos reservados.</p>
+           </footer>
         </div>
     );
   }
 
   // --- APP UI ---
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 font-sans text-slate-800">
+    <div className="min-h-screen bg-gray-50 pb-20 font-sans text-slate-800 flex flex-col">
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-40 border-b border-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 md:h-20 flex items-center justify-between">
@@ -377,7 +383,7 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
         
         {/* VIEW 1: TYPE SELECTION */}
         {step === 'type-selection' && (
@@ -710,6 +716,10 @@ const App: React.FC = () => {
         )}
       </main>
       
+      <footer className="w-full py-6 text-center text-gray-400 text-sm mt-auto">
+        <p>© 2025 Desenvolvido por Bruno Pocce. Todos os direitos reservados.</p>
+      </footer>
+
       {/* COMPARISON MODAL */}
       {comparisonModalPlans && (
           <ComparisonModal 

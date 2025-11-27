@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { supabase } from '../services/supabaseClient';
 
@@ -103,7 +102,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onGoTo
 
   if (isResetMode) {
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 font-sans">
+        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 font-sans">
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 animate-slideUp">
                 <button onClick={() => { setIsResetMode(false); setError(''); setMessage(''); }} className="text-gray-400 hover:text-gray-600 mb-6 flex items-center gap-1 text-sm">
                     &larr; Voltar
@@ -138,12 +137,15 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onGoTo
                     </button>
                 </form>
             </div>
+            <footer className="mt-8 text-gray-400 text-xs text-center">
+              <p>© 2025 Desenvolvido por Bruno Pocce. Todos os direitos reservados.</p>
+            </footer>
         </div>
       );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 font-sans">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 font-sans">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 animate-slideUp">
         <div className="text-center mb-8">
             <div className="flex flex-col items-center group select-none">
@@ -247,6 +249,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onGoTo
           </button>
         </div>
       </div>
+      <footer className="mt-8 text-gray-400 text-xs text-center">
+        <p>© 2025 Desenvolvido por Bruno Pocce. Todos os direitos reservados.</p>
+      </footer>
     </div>
   );
 };
