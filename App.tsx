@@ -116,11 +116,19 @@ const App: React.FC = () => {
     checkUserSession();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'PASSWORD_RECOVERY') {
+        // Critical: Check for recovery hash to prevent auto-redirect
+        const isRecovery = window.location.hash.includes('type=recovery');
+
+        if (event === 'PASSWORD_RECOVERY' || isRecovery) {
             setAuthState('UPDATE_PASSWORD');
         } else if (event === 'SIGNED_IN') {
             if (session?.user) {
-                fetchUserProfile(session.user.id);
+                // If it's a recovery flow, do NOT fetch profile yet, stay on Update Password
+                if (!isRecovery) {
+                    fetchUserProfile(session.user.id);
+                } else {
+                    setAuthState('UPDATE_PASSWORD');
+                }
             }
         } else if (event === 'SIGNED_OUT') {
             setAuthState('LOGIN');
@@ -135,6 +143,12 @@ const App: React.FC = () => {
 
   const checkUserSession = async () => {
     try {
+        // Critical check: If URL has type=recovery, force UPDATE_PASSWORD state
+        if (window.location.hash.includes('type=recovery')) {
+            setAuthState('UPDATE_PASSWORD');
+            return;
+        }
+
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
            await fetchUserProfile(session.user.id);
