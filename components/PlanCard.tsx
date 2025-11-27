@@ -126,13 +126,13 @@ export const PlanCard: React.FC<PlanCardProps> = ({ variants, onComparePlans }) 
             
             {/* View Details Button */}
             <button 
-              onClick={(e) => { e.stopPropagation(); setShowPlanDetails(true); }}
-              className="flex-shrink-0 flex items-center gap-1.5 text-[10px] font-bold text-blue-700 bg-white hover:bg-blue-50 px-3 py-1.5 rounded shadow-sm transition-colors uppercase tracking-wide"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 text-blue-500">
-                <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clipRule="evenodd" />
-              </svg>
-              Ver Detalhes
+                onClick={(e) => { e.stopPropagation(); setShowPlanDetails(true); }}
+                className="group/btn flex-shrink-0 flex items-center gap-1.5 text-xs font-bold text-white bg-white/15 hover:bg-white hover:text-blue-900 px-3 py-1.5 rounded-full shadow-sm transition-all duration-300 backdrop-blur-sm border border-white/20 hover:border-transparent"
+                >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3 transform group-hover/btn:rotate-90 transition-transform duration-300">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                VER DETALHES
             </button>
         </div>
         
@@ -490,6 +490,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({ variants, onComparePlans }) 
               {/* Footer Action */}
               <div className="p-6 border-t border-gray-100 flex-shrink-0">
                 <button 
+                  // Fix: In the plan details modal's close button, call `setShowPlanDetails(false)` instead of the undefined `setSelectedGroup(null)`. The modal's visibility is controlled by the `showPlanDetails` state.
                   onClick={() => setShowPlanDetails(false)}
                   className="w-full bg-blue-900 text-white font-bold py-3 rounded-xl hover:bg-blue-800 transition-colors shadow-lg shadow-blue-900/20"
                 >

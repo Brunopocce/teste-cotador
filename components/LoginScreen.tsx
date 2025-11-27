@@ -20,7 +20,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onGoTo
     // 1. Check Hardcoded Admin
     if (identifier === '236616' && password === '236616') {
       onLoginSuccess(true);
-      setLoading(false);
+      // setLoading(false); // Removed to prevent state update on unmounted component
       return;
     }
 
@@ -53,9 +53,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onGoTo
 
       if (authError) throw authError;
 
-      // Login success, parent component checks status
-      onLoginSuccess(false);
-
+      // onLoginSuccess is called, but parent component will now handle the state change via listener
+      // This function no longer needs to do anything after a successful sign-in
+      
     } catch (err: any) {
       setError(err.message === 'Invalid login credentials' ? 'Credenciais inválidas.' : err.message);
     } finally {
@@ -67,7 +67,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess, onGoTo
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 font-sans">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 animate-slideUp">
         <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-[#003366] tracking-tight mb-2">TEM Saúde</h1>
+            <h1 className="text-3xl font-bold text-[#003366] tracking-tight mb-2">Venda Mais Saúde</h1>
             <p className="text-gray-500">Área do Corretor</p>
         </div>
 

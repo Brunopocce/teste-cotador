@@ -26,7 +26,7 @@ export const getAIAdvice = async (
     }).join('\n');
 
     const systemInstruction = `
-      Você é um consultor especialista em planos de saúde da "TEM Saúde", focado na região de Sorocaba - SP.
+      Você é um consultor especialista em planos de saúde da "Venda Mais Saúde", focado na região de Sorocaba - SP.
       
       Contexto atual do usuário:
       - Perfil Familiar/Empresarial: ${selectionSummary}

@@ -38,26 +38,33 @@ const App: React.FC = () => {
   useEffect(() => {
     checkUserSession();
 
-    // Listen for auth changes
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-         fetchUserProfile(session.user.id);
-      } else {
-         if (authState !== 'ADMIN') setAuthState('LOGIN');
-      }
+        if (event === 'SIGNED_IN') {
+            if (session?.user) {
+                fetchUserProfile(session.user.id);
+            }
+        } else if (event === 'SIGNED_OUT') {
+            setAuthState('LOGIN');
+            setCurrentUser(null);
+        }
     });
 
     return () => {
-      authListener.subscription.unsubscribe();
+        authListener.subscription.unsubscribe();
     };
   }, []);
 
   const checkUserSession = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-       fetchUserProfile(session.user.id);
-    } else {
-       setAuthState('LOGIN');
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+           await fetchUserProfile(session.user.id);
+        } else {
+           setAuthState('LOGIN');
+        }
+    } catch (e) {
+        console.error("Error checking session: ", e);
+        setAuthState('LOGIN'); // Fallback to login on error
     }
   };
 
@@ -78,7 +85,9 @@ const App: React.FC = () => {
           setAuthState('PENDING');
        }
     } else {
-      // Fallback if profile doesn't exist yet but auth does
+      // FIX: User is authenticated but has no profile.
+      // This causes a white screen loop. Force logout to fix state.
+      await supabase.auth.signOut();
       setAuthState('LOGIN');
     }
   };
@@ -87,15 +96,12 @@ const App: React.FC = () => {
     if (isAdmin) {
       setAuthState('ADMIN');
     } else {
-      // The auth listener will pick up the session and set state
-      checkUserSession();
+      // The onAuthStateChange listener will handle the transition
     }
   };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    setAuthState('LOGIN');
-    setCurrentUser(null);
   };
 
   // --- RENDERING AUTH VIEWS ---
@@ -320,7 +326,7 @@ const App: React.FC = () => {
                setQuoteCategory(null);
             }}>
                 <div className="flex items-center">
-                    <span className="text-4xl font-bold text-[#003366] tracking-tight">TEM</span>
+                    <span className="text-4xl font-bold text-[#003366] tracking-tight">Venda Mais</span>
                     <div className="mx-1 relative flex items-center justify-center h-10 w-10">
                         <div className="absolute inset-0 bg-[#003366] rounded opacity-10 transform rotate-45 transition-transform group-hover:rotate-90 duration-500"></div>
                         <svg viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 text-[#003366] z-10">

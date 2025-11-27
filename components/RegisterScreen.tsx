@@ -33,10 +33,16 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin, o
     }
 
     try {
-      // 1. Create Auth User
+      // 1. Create Auth User with metadata
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
+        options: {
+          data: {
+            full_name: formData.name,
+            phone: formData.phone,
+          }
+        }
       });
 
       if (authError) throw authError;
@@ -58,10 +64,15 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin, o
 
         if (profileError) throw profileError;
 
+        alert('Cadastro realizado com sucesso! Aguarde a aprovação do administrador.');
         onRegisterSuccess();
       }
     } catch (err: any) {
-      setError(err.message || "Erro ao cadastrar. Verifique os dados.");
+      if (err.message.includes('unique constraint')) {
+        setError("Este email ou CPF já está cadastrado.");
+      } else {
+        setError(err.message || "Erro ao cadastrar. Verifique os dados.");
+      }
     } finally {
       setLoading(false);
     }
