@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { MOCK_PLANS, AGE_RANGES } from './constants';
 import { AgeRange, UserSelection, CalculatedPlan, QuoteCategory, HealthPlan, UserProfile } from './types';
@@ -33,6 +34,82 @@ const App: React.FC = () => {
   const [groupedPlans, setGroupedPlans] = useState<CalculatedPlan[][]>([]);
 
   const whatsappLink = "https://wa.me/5515991789707?text=Ol%C3%A1%2C%20Bruno!%0AQuero%20mais%20informa%C3%A7%C3%B5es%20sobre%20*plano%20de%20sa%C3%BAde*";
+
+  // --- LOGIC HOOKS (MOVED UP TO FIX ERROR #310) ---
+
+  const totalLives = Object.values(userSelection).reduce((acc: number, curr: number) => acc + curr, 0);
+
+  const isSoloMinor = useMemo(() => {
+    if (totalLives === 0) return false;
+    const minorCount = userSelection[AgeRange.RANGE_0_18] || 0;
+    return minorCount === totalLives;
+  }, [userSelection, totalLives]);
+
+  // Calculation Effect
+  useEffect(() => {
+    const activeAges = (Object.entries(userSelection) as [string, number][]).filter(([_, count]) => count > 0);
+    let availablePlans = MOCK_PLANS.filter(p => quoteCategory && p.categories.includes(quoteCategory));
+
+    if (quoteCategory === 'PF' && isSoloMinor) {
+      availablePlans = availablePlans.filter(p => !p.operator.toLowerCase().includes('fênix'));
+    }
+
+    if (activeAges.length === 0) {
+      setCalculatedPlans([]);
+      setGroupedPlans([]);
+      return;
+    }
+
+    const results: CalculatedPlan[] = availablePlans.map(plan => {
+      let total = 0;
+      const details = [];
+      for (const [range, count] of activeAges) {
+        const price = plan.prices[range] || 0;
+        const subtotal = price * count;
+        total += subtotal;
+        details.push({ ageRange: range, count, unitPrice: price, subtotal });
+      }
+      return { plan, totalPrice: total, details };
+    }).sort((a, b) => {
+      const getPlanWeight = (plan: HealthPlan) => {
+        const op = plan.operator.toLowerCase();
+        const name = plan.name.toLowerCase();
+        if (op.includes('amhemed')) {
+          if (name.includes('ideal')) return 10;
+          if (name.includes('amhe+')) return 11;
+          if (name.includes('plus')) return 12;
+          return 19;
+        }
+        if (op.includes('gndi') || op.includes('notredame')) {
+          if (name.includes('nosso')) return 20;
+          if (name.includes('notrelife')) return 21;
+          if (name.includes('200')) return 22;
+          if (name.includes('400')) return 23;
+          return 29;
+        }
+        if (op.includes('eva')) return 30;
+        if (op.includes('fênix') || op.includes('fenix')) return 40;
+        if (op.includes('unimed')) return 50;
+        if (op.includes('amil')) return 60;
+        return 100;
+      };
+      const weightA = getPlanWeight(a.plan);
+      const weightB = getPlanWeight(b.plan);
+      if (weightA !== weightB) return weightA - weightB;
+      return a.totalPrice - b.totalPrice;
+    });
+
+    setCalculatedPlans(results);
+
+    const groupedMap = new Map<string, CalculatedPlan[]>();
+    results.forEach(cp => {
+      const key = `${cp.plan.operator}|${cp.plan.name}|${cp.plan.type}`;
+      if (!groupedMap.has(key)) groupedMap.set(key, []);
+      groupedMap.get(key)?.push(cp);
+    });
+    setGroupedPlans(Array.from(groupedMap.values()));
+
+  }, [userSelection, quoteCategory, isSoloMinor]);
 
   // --- AUTH EFFECT ---
   useEffect(() => {
@@ -104,7 +181,87 @@ const App: React.FC = () => {
     await supabase.auth.signOut();
   };
 
-  // --- RENDERING AUTH VIEWS ---
+  // --- HELPER FUNCTIONS ---
+
+  const selectCategory = (category: QuoteCategory) => {
+    setQuoteCategory(category);
+    const initial: UserSelection = {};
+    AGE_RANGES.forEach(range => initial[range as string] = 0);
+    setUserSelection(initial);
+    setShowLimitAlert(false);
+    setComparisonModalPlans(null);
+    setStep('age-input');
+  };
+
+  const goBack = () => {
+    if (step === 'results') {
+      setStep('age-input');
+      setComparisonModalPlans(null);
+    } else if (step === 'age-input') {
+      if (quoteCategory === 'PF') {
+        setStep('type-selection');
+        setQuoteCategory(null);
+      } else {
+        setStep('lives-selection');
+      }
+    } else if (step === 'lives-selection') {
+      setStep('type-selection');
+    }
+  };
+
+  const switchToGroupPlan = () => {
+    setQuoteCategory('PME_2');
+    setShowLimitAlert(false);
+  };
+
+  const switchToPME1 = () => {
+    setQuoteCategory('PME_1');
+    setShowLimitAlert(false);
+  };
+
+  const switchToPF = () => {
+    setQuoteCategory('PF');
+    setShowLimitAlert(false);
+  };
+
+  const handleIncrement = (range: string) => {
+    setUserSelection(prev => ({ ...prev, [range]: prev[range] + 1 }));
+    setShowLimitAlert(false);
+  };
+
+  const handleDecrement = (range: string) => {
+    setUserSelection(prev => ({ ...prev, [range]: Math.max(0, prev[range] - 1) }));
+    setShowLimitAlert(false);
+  };
+
+  const handleComparePlans = (plansToCompare: CalculatedPlan[]) => {
+      setComparisonModalPlans(plansToCompare);
+  };
+
+  const handleContinueToResults = () => {
+    if (totalLives === 0) return;
+    if (quoteCategory === 'PME_1' && totalLives > 1) return;
+    if (quoteCategory === 'PME_2' && totalLives < 2) return;
+    if (quoteCategory?.startsWith('PME') && isSoloMinor) return;
+
+    setStep('results');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const getCategoryTitle = () => {
+    switch (quoteCategory) {
+      case 'PF': return 'Pessoa Física';
+      case 'PME_1': return 'CNPJ / MEI (1 Vida)';
+      case 'PME_2': return 'CNPJ / MEI (2-29 Vidas)';
+      case 'PME_30': return 'CNPJ / MEI (+30 Vidas)';
+      default: return '';
+    }
+  };
+
+  const isPME = quoteCategory?.startsWith('PME');
+
+
+  // --- MAIN RENDER ---
 
   if (authState === 'LOADING') {
     return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-[#003366] font-bold">Carregando...</div>;
@@ -161,160 +318,7 @@ const App: React.FC = () => {
     );
   }
 
-  // --- APP LOGIC (Only runs if authState === 'APP') ---
-
-  const selectCategory = (category: QuoteCategory) => {
-    setQuoteCategory(category);
-    const initial: UserSelection = {};
-    AGE_RANGES.forEach(range => initial[range as string] = 0);
-    setUserSelection(initial);
-    setShowLimitAlert(false);
-    setComparisonModalPlans(null);
-    setStep('age-input');
-  };
-
-  const goBack = () => {
-    if (step === 'results') {
-      setStep('age-input');
-      setComparisonModalPlans(null);
-    } else if (step === 'age-input') {
-      if (quoteCategory === 'PF') {
-        setStep('type-selection');
-        setQuoteCategory(null);
-      } else {
-        setStep('lives-selection');
-      }
-    } else if (step === 'lives-selection') {
-      setStep('type-selection');
-    }
-  };
-
-  const switchToGroupPlan = () => {
-    setQuoteCategory('PME_2');
-    setShowLimitAlert(false);
-  };
-
-  const switchToPME1 = () => {
-    setQuoteCategory('PME_1');
-    setShowLimitAlert(false);
-  };
-
-  const switchToPF = () => {
-    setQuoteCategory('PF');
-    setShowLimitAlert(false);
-  };
-
-  const totalLives = Object.values(userSelection).reduce((acc: number, curr: number) => acc + curr, 0);
-
-  const isSoloMinor = useMemo(() => {
-    if (totalLives === 0) return false;
-    const minorCount = userSelection[AgeRange.RANGE_0_18] || 0;
-    return minorCount === totalLives;
-  }, [userSelection, totalLives]);
-
-  const handleIncrement = (range: string) => {
-    setUserSelection(prev => ({ ...prev, [range]: prev[range] + 1 }));
-    setShowLimitAlert(false);
-  };
-
-  const handleDecrement = (range: string) => {
-    setUserSelection(prev => ({ ...prev, [range]: Math.max(0, prev[range] - 1) }));
-    setShowLimitAlert(false);
-  };
-
-  const handleComparePlans = (plansToCompare: CalculatedPlan[]) => {
-      setComparisonModalPlans(plansToCompare);
-  };
-
-  const handleContinueToResults = () => {
-    if (totalLives === 0) return;
-    if (quoteCategory === 'PME_1' && totalLives > 1) return;
-    if (quoteCategory === 'PME_2' && totalLives < 2) return;
-    if (quoteCategory?.startsWith('PME') && isSoloMinor) return;
-
-    setStep('results');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Calculation Effect (Same as before)
-  useEffect(() => {
-    const activeAges = (Object.entries(userSelection) as [string, number][]).filter(([_, count]) => count > 0);
-    let availablePlans = MOCK_PLANS.filter(p => quoteCategory && p.categories.includes(quoteCategory));
-
-    if (quoteCategory === 'PF' && isSoloMinor) {
-      availablePlans = availablePlans.filter(p => !p.operator.toLowerCase().includes('fênix'));
-    }
-
-    if (activeAges.length === 0) {
-      setCalculatedPlans([]);
-      setGroupedPlans([]);
-      return;
-    }
-
-    const results: CalculatedPlan[] = availablePlans.map(plan => {
-      let total = 0;
-      const details = [];
-      for (const [range, count] of activeAges) {
-        const price = plan.prices[range] || 0;
-        const subtotal = price * count;
-        total += subtotal;
-        details.push({ ageRange: range, count, unitPrice: price, subtotal });
-      }
-      return { plan, totalPrice: total, details };
-    }).sort((a, b) => {
-      const getPlanWeight = (plan: HealthPlan) => {
-        const op = plan.operator.toLowerCase();
-        const name = plan.name.toLowerCase();
-        if (op.includes('amhemed')) {
-          if (name.includes('ideal')) return 10;
-          if (name.includes('amhe+')) return 11;
-          if (name.includes('plus')) return 12;
-          return 19;
-        }
-        if (op.includes('gndi') || op.includes('notredame')) {
-          if (name.includes('nosso')) return 20;
-          if (name.includes('notrelife')) return 21;
-          if (name.includes('200')) return 22;
-          if (name.includes('400')) return 23;
-          return 29;
-        }
-        if (op.includes('eva')) return 30;
-        if (op.includes('fênix') || op.includes('fenix')) return 40;
-        if (op.includes('unimed')) return 50;
-        if (op.includes('amil')) return 60;
-        return 100;
-      };
-      const weightA = getPlanWeight(a.plan);
-      const weightB = getPlanWeight(b.plan);
-      if (weightA !== weightB) return weightA - weightB;
-      return a.totalPrice - b.totalPrice;
-    });
-
-    setCalculatedPlans(results);
-
-    const groupedMap = new Map<string, CalculatedPlan[]>();
-    results.forEach(cp => {
-      const key = `${cp.plan.operator}|${cp.plan.name}|${cp.plan.type}`;
-      if (!groupedMap.has(key)) groupedMap.set(key, []);
-      groupedMap.get(key)?.push(cp);
-    });
-    setGroupedPlans(Array.from(groupedMap.values()));
-
-  }, [userSelection, quoteCategory, isSoloMinor]);
-
-  const getCategoryTitle = () => {
-    switch (quoteCategory) {
-      case 'PF': return 'Pessoa Física';
-      case 'PME_1': return 'CNPJ / MEI (1 Vida)';
-      case 'PME_2': return 'CNPJ / MEI (2-29 Vidas)';
-      case 'PME_30': return 'CNPJ / MEI (+30 Vidas)';
-      default: return '';
-    }
-  };
-
-  const isPME = quoteCategory?.startsWith('PME');
-
-  // --- RENDER APP ---
+  // --- APP UI ---
   return (
     <div className="min-h-screen bg-gray-50 pb-20 font-sans text-slate-800">
       {/* Header */}
