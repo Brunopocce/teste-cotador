@@ -28,7 +28,14 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin, o
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    let value = e.target.value;
+
+    // Converte Nome e Email para maiúsculas automaticamente
+    if (e.target.name === 'name' || e.target.name === 'email') {
+      value = value.toUpperCase();
+    }
+
+    setFormData({ ...formData, [e.target.name]: value });
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -178,7 +185,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin, o
             <input 
               name="name" type="text" required
               value={formData.name} onChange={handleChange}
-              className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-gray-100 text-gray-900 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+              className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-gray-100 text-gray-900 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all uppercase"
             />
           </div>
 
@@ -206,7 +213,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin, o
             <input 
               name="email" type="email" required
               value={formData.email} onChange={handleChange}
-              className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-gray-100 text-gray-900 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+              className="w-full px-3 py-3 rounded-lg border border-gray-300 bg-gray-100 text-gray-900 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all uppercase"
             />
           </div>
 

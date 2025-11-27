@@ -431,7 +431,6 @@ const App: React.FC = () => {
           </div>
         )}
         
-        {/* ... Rest of the component (View 2, 3, 4) remains largely the same ... */}
         {/* VIEW 2: LIVES SELECTION (CNPJ) */}
         {step === 'lives-selection' && (
            <div className="flex flex-col items-center justify-center min-h-[60vh] animate-slideUp">
@@ -483,8 +482,12 @@ const App: React.FC = () => {
 
         {/* VIEW 3: AGE INPUT */}
         {step === 'age-input' && (
-          <div className="flex flex-col items-center justify-start min-h-[60vh] animate-slideUp pt-4">
-            <div className="w-full max-w-2xl">
+          // Key fix: w-full on the flex container ensures it takes full width of parent (max-w-7xl)
+          // instead of shrinking to fit content, preventing jumps when alert appears.
+          <div className="w-full flex flex-col items-center justify-start min-h-[60vh] animate-slideUp pt-4">
+            
+            {/* Fixed max-w-2xl keeps it wide enough but not too wide, and static */}
+            <div className="w-full max-w-2xl mx-auto">
               <div className="flex items-center justify-between mb-6">
                  <button onClick={goBack} className="flex items-center text-gray-500 hover:text-[#003366]">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1">
@@ -498,18 +501,18 @@ const App: React.FC = () => {
                  </div>
               </div>
 
-              <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">Quem será coberto?</h2>
-              <p className="text-gray-500 mb-8 text-center">Adicione a quantidade de pessoas por faixa etária.</p>
-
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 overflow-hidden">
                  
+                 <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">Quem será coberto?</h2>
+                 <p className="text-gray-500 mb-8 text-center">Adicione a quantidade de pessoas por faixa etária.</p>
+
                  {/* Table Header */}
-                 <div className="flex justify-between items-center px-3 mb-2">
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Faixa Etária</span>
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Quantidade</span>
+                 <div className="flex justify-between items-center px-3 mb-4">
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Faixas Etárias</span>
                  </div>
 
-                 <div className="space-y-3">
+                 {/* Grid Layout for Ages */}
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                     {AGE_RANGES.map((range) => (
                       <AgeSelector 
                         key={range}
@@ -521,10 +524,10 @@ const App: React.FC = () => {
                     ))}
                  </div>
 
-                 <div className="mt-8 pt-6 border-t border-gray-100">
+                 <div className="pt-6 border-t border-gray-100">
                     <div className="flex justify-between items-center mb-6">
-                      <span className="text-gray-600 font-medium">Total de vidas:</span>
-                      <span className="text-3xl font-bold text-blue-600">{totalLives}</span>
+                      <span className="text-gray-600 font-medium text-lg">Total de vidas:</span>
+                      <span className="text-4xl font-bold text-[#003366]">{totalLives}</span>
                     </div>
 
                     <button 
@@ -537,7 +540,7 @@ const App: React.FC = () => {
                       }
                       className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all transform
                         ${totalLives > 0 && !(isPME && isSoloMinor) && !(quoteCategory === 'PME_1' && totalLives > 1) && !(quoteCategory === 'PME_2' && totalLives === 1)
-                          ? 'bg-[#003366] text-white hover:bg-[#002244] hover:scale-[1.02]' 
+                          ? 'bg-[#003366] text-white hover:bg-[#002244] hover:scale-[1.01]' 
                           : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
                     >
                       Avançar para Cotação
@@ -677,7 +680,7 @@ const App: React.FC = () => {
                 <div className="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-r shadow-sm">
                    <div className="flex items-start">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-orange-500 mr-3 flex-shrink-0">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                     </svg>
                     <div>
                        <h3 className="font-bold text-orange-900 text-sm">Cotação para Menor de Idade (PF)</h3>
