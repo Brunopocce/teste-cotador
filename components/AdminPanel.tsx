@@ -43,40 +43,71 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('pt-BR');
+    return new Date(dateString).toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
-  const formatPlan = (plan?: string) => {
-      if (plan === 'monthly') return 'Mensal';
-      if (plan === 'quarterly') return 'Trimestral';
-      return '-';
-  };
-
-  const calculateTimeRemaining = (createdAt: string, plan?: string) => {
+  const calculatePlanDetails = (createdAt: string, plan?: string) => {
     if (!plan || (plan !== 'monthly' && plan !== 'quarterly')) {
-        return { label: '-', color: 'bg-gray-100 text-gray-400' };
+        return {
+            planLabel: 'Não Identificado',
+            planColor: 'bg-gray-100 text-gray-500',
+            expirationDate: '-',
+            trialEndDate: '-',
+            statusLabel: '-',
+            statusColor: 'bg-gray-100 text-gray-400'
+        };
     }
 
     const createdDate = new Date(createdAt);
-    // Mensal: 30 dias + 7 dias teste = 37
-    // Trimestral: 90 dias + 7 dias teste = 97
-    const durationDays = plan === 'quarterly' ? 97 : 37;
     
-    const expirationDate = new Date(createdDate.getTime() + (durationDays * 24 * 60 * 60 * 1000));
+    // Período de Teste: 7 dias
+    const trialDateObj = new Date(createdDate);
+    trialDateObj.setDate(trialDateObj.getDate() + 7);
+    
+    // Duração do Plano (Mensal: 30, Trimestral: 90)
+    const planDuration = plan === 'quarterly' ? 90 : 30;
+    
+    // Expiração Total = Data Criação + 7 dias teste + Duração do Plano
+    const expirationDateObj = new Date(createdDate);
+    expirationDateObj.setDate(expirationDateObj.getDate() + 7 + planDuration);
+
     const today = new Date();
-    
-    // Difference in milliseconds
-    const diffTime = expirationDate.getTime() - today.getTime();
-    // Difference in days
+    const diffTime = expirationDateObj.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
+    // Formatação de Datas
+    const trialEndDate = trialDateObj.toLocaleDateString('pt-BR');
+    const expirationDate = expirationDateObj.toLocaleDateString('pt-BR');
+
+    // Labels e Cores
+    let statusLabel = `${diffDays} dias restantes`;
+    let statusColor = 'bg-green-100 text-green-700';
+
     if (diffDays <= 0) {
-        return { label: 'Expirado', color: 'bg-red-100 text-red-700' };
+        statusLabel = 'Expirado';
+        statusColor = 'bg-red-100 text-red-700';
     } else if (diffDays <= 5) {
-        return { label: `Expira em ${diffDays} dias`, color: 'bg-yellow-100 text-yellow-800' };
-    } else {
-        return { label: `${diffDays} dias restantes`, color: 'bg-green-100 text-green-700' };
+        statusLabel = `Expira em ${diffDays} dias`;
+        statusColor = 'bg-yellow-100 text-yellow-800';
     }
+
+    const planLabel = plan === 'quarterly' ? 'Trimestral' : 'Mensal';
+    const planColor = plan === 'quarterly' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700';
+
+    return {
+        planLabel,
+        planColor,
+        expirationDate,
+        trialEndDate,
+        statusLabel,
+        statusColor
+    };
   };
 
   return (
@@ -102,58 +133,61 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50 text-gray-500 text-xs uppercase">
-                  <th className="p-4">Data/Hora</th>
-                  <th className="p-4">Nome</th>
-                  <th className="p-4">CPF</th>
-                  <th className="p-4">Email / Telefone</th>
-                  <th className="p-4 text-center">Plano</th>
-                  <th className="p-4 text-center">Validade</th>
-                  <th className="p-4 text-center">Status</th>
+                  <th className="p-4">Data Cadastro</th>
+                  <th className="p-4">Dados Pessoais</th>
+                  <th className="p-4">Contato</th>
+                  <th className="p-4 text-center">Plano Escolhido</th>
+                  <th className="p-4 text-center">Validade & Teste</th>
+                  <th className="p-4 text-center">Status Acesso</th>
                   <th className="p-4 text-center">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
                    <tr>
-                     <td colSpan={8} className="p-8 text-center text-gray-500">Carregando...</td>
+                     <td colSpan={7} className="p-8 text-center text-gray-500">Carregando...</td>
                    </tr>
                 ) : users.length === 0 ? (
                   <tr>
-                     <td colSpan={8} className="p-8 text-center text-gray-500">Nenhum cadastro encontrado.</td>
+                     <td colSpan={7} className="p-8 text-center text-gray-500">Nenhum cadastro encontrado.</td>
                    </tr>
                 ) : (
                   users.map(user => {
-                    const timeInfo = calculateTimeRemaining(user.created_at, user.plan);
+                    const details = calculatePlanDetails(user.created_at, user.plan);
                     return (
                         <tr key={user.id} className="hover:bg-gray-50">
-                        <td className="p-4 text-sm text-gray-600 whitespace-nowrap">
+                        <td className="p-4 text-xs text-gray-500 whitespace-nowrap align-top">
                             {formatDate(user.created_at)}
                         </td>
-                        <td className="p-4 font-medium text-gray-800">
-                            {user.full_name}
+                        <td className="p-4 align-top">
+                            <div className="font-bold text-gray-800 text-sm">{user.full_name}</div>
+                            <div className="text-xs text-gray-500 mt-1">CPF: {user.cpf}</div>
                         </td>
-                        <td className="p-4 text-sm text-gray-600">
-                            {user.cpf}
-                        </td>
-                        <td className="p-4 text-sm text-gray-600">
-                            <div className="flex flex-col">
-                            <span>{user.email}</span>
-                            <span className="text-xs text-gray-400">{user.phone}</span>
+                        <td className="p-4 text-sm text-gray-600 align-top">
+                            <div className="flex flex-col gap-1">
+                                <span className="font-medium text-gray-800">{user.email}</span>
+                                <span className="text-xs text-gray-500">{user.phone}</span>
                             </div>
                         </td>
-                        <td className="p-4 text-center">
-                            <span className={`inline-block px-2 py-1 rounded text-xs font-bold uppercase
-                                ${user.plan === 'quarterly' ? 'bg-green-100 text-green-700' : 'bg-blue-50 text-blue-600'}
-                            `}>
-                                {formatPlan(user.plan)}
+                        <td className="p-4 text-center align-top">
+                            <span className={`inline-block px-3 py-1 rounded text-xs font-bold uppercase mb-1 ${details.planColor}`}>
+                                {details.planLabel}
                             </span>
                         </td>
-                        <td className="p-4 text-center">
-                            <span className={`inline-block px-2 py-1 rounded-full text-xs font-bold ${timeInfo.color}`}>
-                                {timeInfo.label}
-                            </span>
+                        <td className="p-4 text-center align-top">
+                            <div className="flex flex-col items-center gap-1">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${details.statusColor.replace('bg-', 'border-').replace('text-', 'text-')}`}>
+                                    {details.statusLabel}
+                                </span>
+                                <div className="text-xs text-gray-700 mt-1">
+                                    <span className="font-bold">Expira:</span> {details.expirationDate}
+                                </div>
+                                <div className="text-[10px] text-gray-400">
+                                    Teste até: {details.trialEndDate}
+                                </div>
+                            </div>
                         </td>
-                        <td className="p-4 text-center">
+                        <td className="p-4 text-center align-top">
                             <span className={`inline-block px-2 py-1 rounded-full text-xs font-bold uppercase
                             ${user.status === 'approved' ? 'bg-green-100 text-green-700' : 
                                 user.status === 'rejected' ? 'bg-red-100 text-red-700' : 
@@ -163,13 +197,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                             'Pendente'}
                             </span>
                         </td>
-                        <td className="p-4 text-center">
+                        <td className="p-4 text-center align-top">
                             <div className="flex justify-center gap-2">
                             {user.status !== 'approved' && (
                                 <button 
                                 onClick={() => updateUserStatus(user.id, 'approved')}
-                                className="bg-green-600 text-white p-2 rounded hover:bg-green-700 title"
-                                title="Aprovar"
+                                className="bg-green-600 text-white p-2 rounded hover:bg-green-700 transition-colors shadow-sm"
+                                title="Aprovar Acesso"
                                 >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
@@ -179,8 +213,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                             {user.status !== 'rejected' && (
                                 <button 
                                 onClick={() => updateUserStatus(user.id, 'rejected')}
-                                className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
-                                title="Recusar"
+                                className="bg-red-500 text-white p-2 rounded hover:bg-red-600 transition-colors shadow-sm"
+                                title="Recusar Acesso"
                                 >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
