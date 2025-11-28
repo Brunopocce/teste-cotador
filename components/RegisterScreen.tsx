@@ -73,9 +73,10 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin, o
 
       if (authData.user) {
         // 2. Create Profile
+        // Use upsert to handle cases where a database trigger might create the profile row first
         const { error: profileError } = await supabase
           .from('profiles')
-          .insert([
+          .upsert([
             {
               id: authData.user.id,
               full_name: formData.name,
@@ -83,14 +84,12 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin, o
               email: formData.email,
               phone: formData.phone,
               status: 'pending', // Default status
-              plan: selectedPlan // Ensure plan is saved to profiles table
+              plan: selectedPlan // Insert selected plan into profile
             }
           ]);
 
         if (profileError) {
-             console.warn("Could not save to profiles table (schema mismatch?):", profileError);
-             // We don't throw here to allow flow to continue if auth was successful, 
-             // relying on Auth metadata as backup or manual admin check.
+             console.warn("Could not save to profiles table:", profileError);
         }
 
         alert('Cadastro realizado com sucesso! Instruções de pagamento serão enviadas via WhatsApp.');
