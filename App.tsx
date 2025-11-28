@@ -231,6 +231,8 @@ const App: React.FC = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    setAuthState('LOGIN');
+    setCurrentUser(null);
   };
 
   // --- HELPER FUNCTIONS ---
