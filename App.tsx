@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { MOCK_PLANS, AGE_RANGES } from './constants';
 import { AgeRange, UserSelection, CalculatedPlan, QuoteCategory, HealthPlan, UserProfile } from './types';
@@ -32,6 +33,9 @@ const App: React.FC = () => {
   });
   const [calculatedPlans, setCalculatedPlans] = useState<CalculatedPlan[]>([]);
   const [groupedPlans, setGroupedPlans] = useState<CalculatedPlan[][]>([]);
+  
+  // State for Accordion (Operator Grouping)
+  const [expandedOperators, setExpandedOperators] = useState<Record<string, boolean>>({});
 
   const whatsappLink = "https://wa.me/5515991789707?text=Ol%C3%A1%2C%20Bruno!%0AQuero%20mais%20informa%C3%A7%C3%B5es%20sobre%20*plano%20de%20sa%C3%BAde*";
 
@@ -110,6 +114,39 @@ const App: React.FC = () => {
     setGroupedPlans(Array.from(groupedMap.values()));
 
   }, [userSelection, quoteCategory, isSoloMinor]);
+
+  // --- GROUPING BY OPERATOR (New Logic) ---
+  const operatorGroups = useMemo(() => {
+    const groups: { operator: string; logoColor: string; plans: CalculatedPlan[][] }[] = [];
+    groupedPlans.forEach(group => {
+        const plan = group[0].plan;
+        const existing = groups.find(g => g.operator === plan.operator);
+        if (existing) {
+            existing.plans.push(group);
+        } else {
+            groups.push({ operator: plan.operator, logoColor: plan.logoColor, plans: [group] });
+        }
+    });
+    return groups;
+  }, [groupedPlans]);
+
+  // Reset expansion when results are shown
+  useEffect(() => {
+    if (step === 'results') {
+        // Ensure all are collapsed by default when entering results
+        setExpandedOperators({});
+    }
+  }, [step]);
+
+  const toggleOperator = (operator: string) => {
+    setExpandedOperators(prev => ({
+        ...prev,
+        [operator]: !prev[operator]
+    }));
+  };
+
+  // Helper for formatting currency in the UI
+  const formatMoney = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
   // --- AUTH EFFECT ---
   useEffect(() => {
@@ -701,14 +738,63 @@ const App: React.FC = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-fadeIn">
-              {groupedPlans.map((group, idx) => (
-                <PlanCard 
-                    key={`${group[0].plan.id}-${idx}`} 
-                    variants={group} 
-                    onComparePlans={handleComparePlans}
-                />
-              ))}
+            {/* NEW: GROUPED PLAN DISPLAY (ACCORDION) */}
+            <div className="space-y-6 animate-fadeIn">
+              {operatorGroups.map((group) => {
+                // Calculate the minimum price for this group
+                const allVariants = group.plans.flat();
+                const minPrice = allVariants.reduce((min, p) => p.totalPrice < min ? p.totalPrice : min, allVariants[0].totalPrice);
+
+                return (
+                  <div key={group.operator} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                      {/* Header - Always Visible */}
+                      <button 
+                          onClick={() => toggleOperator(group.operator)}
+                          className={`w-full flex items-center justify-between p-4 md:p-6 transition-colors duration-200
+                            ${expandedOperators[group.operator] ? 'bg-gray-50' : 'bg-white hover:bg-gray-50'}
+                          `}
+                      >
+                          <div className="flex items-center gap-4">
+                              {/* Operator Logo/Badge */}
+                              <div className={`h-12 w-32 md:w-40 rounded-lg ${group.logoColor} flex items-center justify-center shadow-sm text-white font-bold text-sm md:text-lg leading-none text-center px-2 py-1`}>
+                                  <span className="leading-none">{group.operator}</span>
+                              </div>
+                              
+                              <div className="text-left">
+                                  <h3 className="font-bold text-gray-800 text-lg md:text-xl">
+                                    A partir de {formatMoney(minPrice)}
+                                  </h3>
+                                  <p className="text-xs md:text-sm text-gray-500 font-medium">
+                                      {group.plans.length} {group.plans.length === 1 ? 'opção encontrada' : 'opções encontradas'}
+                                  </p>
+                              </div>
+                          </div>
+
+                          {/* Chevron */}
+                          <div className={`p-2 rounded-full bg-white shadow-sm border border-gray-100 transition-transform duration-300 ${expandedOperators[group.operator] ? 'rotate-180' : 'rotate-0'}`}>
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-gray-500">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                              </svg>
+                          </div>
+                      </button>
+
+                      {/* Content - Expandable */}
+                      {expandedOperators[group.operator] && (
+                          <div className="p-4 md:p-6 bg-gray-50/50 border-t border-gray-200 animate-slideIn">
+                              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                  {group.plans.map((planVariants, idx) => (
+                                      <PlanCard 
+                                          key={`${planVariants[0].plan.id}-${idx}`} 
+                                          variants={planVariants} 
+                                          onComparePlans={handleComparePlans}
+                                      />
+                                  ))}
+                              </div>
+                          </div>
+                      )}
+                  </div>
+                );
+              })}
             </div>
 
             <PriceSummaryTable groups={groupedPlans} />
