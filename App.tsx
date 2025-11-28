@@ -37,7 +37,7 @@ const App: React.FC = () => {
 
   // --- LOGIC HOOKS (MOVED UP TO FIX ERROR #310) ---
 
-  const totalLives = Object.values(userSelection).reduce((acc: number, curr: number) => acc + curr, 0);
+  const totalLives: number = (Object.values(userSelection) as number[]).reduce((acc, curr) => acc + curr, 0);
 
   const isSoloMinor = useMemo(() => {
     if (totalLives === 0) return false;
@@ -482,12 +482,11 @@ const App: React.FC = () => {
 
         {/* VIEW 3: AGE INPUT */}
         {step === 'age-input' && (
-          // Key fix: w-full on the flex container ensures it takes full width of parent (max-w-7xl)
-          // instead of shrinking to fit content, preventing jumps when alert appears.
-          <div className="w-full flex flex-col items-center justify-start min-h-[60vh] animate-slideUp pt-4">
+          // Wrapper Geral (Tabela + Aviso)
+          <div className="w-full min-h-[60vh] animate-slideUp pt-4 flex flex-col items-center overflow-x-hidden">
             
-            {/* Fixed max-w-2xl keeps it wide enough but not too wide, and static */}
-            <div className="w-full max-w-2xl mx-auto">
+            {/* Container que envolve a tabela */}
+            <div className="w-full mx-auto box-border md:w-[480px] md:min-w-[480px] md:max-w-[480px]">
               <div className="flex items-center justify-between mb-6">
                  <button onClick={goBack} className="flex items-center text-gray-500 hover:text-[#003366]">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1">
@@ -501,7 +500,7 @@ const App: React.FC = () => {
                  </div>
               </div>
 
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 overflow-hidden">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 overflow-hidden w-full">
                  
                  <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">Quem será coberto?</h2>
                  <p className="text-gray-500 mb-8 text-center">Adicione a quantidade de pessoas por faixa etária.</p>
@@ -511,8 +510,8 @@ const App: React.FC = () => {
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Faixas Etárias</span>
                  </div>
 
-                 {/* Grid Layout for Ages */}
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                 {/* List Layout for Ages (Vertical Stack) */}
+                 <div className="flex flex-col gap-3 mb-8">
                     {AGE_RANGES.map((range) => (
                       <AgeSelector 
                         key={range}
@@ -548,7 +547,7 @@ const App: React.FC = () => {
                     
                     {/* Age Restriction Alert for PME (Solo Minor) */}
                     {isPME && isSoloMinor && totalLives > 0 && (
-                      <div className="mt-6 bg-red-50 p-5 rounded-xl border border-red-200 animate-fadeIn">
+                      <div className="mt-6 bg-red-50 p-4 rounded-xl border border-red-200 animate-fadeIn w-full mx-auto box-border md:max-w-[480px]">
                         <div className="flex items-start gap-3">
                            <div className="p-2 bg-red-100 rounded-full text-red-600 shrink-0">
                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
@@ -557,10 +556,10 @@ const App: React.FC = () => {
                            </div>
                            <div className="flex-1">
                              <h4 className="font-bold text-red-900 text-base mb-1">É necessário um titular adulto</h4>
-                             <p className="text-red-800 text-sm">
+                             <p className="text-red-800 text-xs">
                                Planos empresariais não podem ser contratados exclusivamente para menores de idade.
                              </p>
-                             <p className="text-red-800 text-sm mt-2">
+                             <p className="text-red-800 text-xs mt-2">
                                Por favor, <strong>adicione ao menos um adulto</strong> para prosseguir.
                              </p>
                            </div>
@@ -570,7 +569,7 @@ const App: React.FC = () => {
 
                     {/* Warning PME 1 > 1 Life */}
                     {quoteCategory === 'PME_1' && totalLives > 1 && !(isPME && isSoloMinor) && (
-                      <div className="mt-6 bg-orange-50 p-5 rounded-xl border border-orange-200 animate-fadeIn">
+                      <div className="mt-6 bg-orange-50 p-4 rounded-xl border border-orange-200 animate-fadeIn w-full mx-auto box-border md:max-w-[480px]">
                         <div className="flex items-start gap-3">
                            <div className="p-2 bg-orange-100 rounded-full text-orange-600 shrink-0">
                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
@@ -579,10 +578,10 @@ const App: React.FC = () => {
                            </div>
                            <div className="flex-1">
                              <h4 className="font-bold text-orange-900 text-base mb-1">Ajuste necessário</h4>
-                             <p className="text-orange-800 text-sm mb-3">
+                             <p className="text-orange-800 text-xs mb-3">
                                A modalidade <strong>"1 Vida"</strong> é exclusiva para o <strong>titular do CNPJ</strong>.
                              </p>
-                             <p className="text-orange-800 text-sm mb-4">
+                             <p className="text-orange-800 text-xs mb-4">
                                Para prosseguir, <strong>selecione apenas 1 vida acima</strong> ou altere para a modalidade de <strong>2 a 29 vidas</strong>:
                              </p>
 
@@ -602,7 +601,7 @@ const App: React.FC = () => {
 
                     {/* Warning PME 2-29 with 1 Life */}
                     {quoteCategory === 'PME_2' && totalLives === 1 && !(isPME && isSoloMinor) && (
-                      <div className="mt-6 bg-blue-50 p-5 rounded-xl border border-blue-200 animate-fadeIn">
+                      <div className="mt-6 bg-blue-50 p-4 rounded-xl border border-blue-200 animate-fadeIn w-full mx-auto box-border md:max-w-[480px]">
                         <div className="flex items-start gap-3">
                            <div className="p-2 bg-blue-100 rounded-full text-blue-600 shrink-0">
                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
@@ -610,21 +609,20 @@ const App: React.FC = () => {
                              </svg>
                            </div>
                            <div className="flex-1">
-                             <h4 className="font-bold text-blue-900 text-base mb-1">Mínimo de 2 vidas</h4>
-                             <p className="text-blue-800 text-sm mb-4">
-                               Para a modalidade <strong>"2 a 29 vidas"</strong>, é necessário incluir ao menos 2 beneficiários. <br/>
-                               Se você deseja cotar apenas para 1 pessoa, escolha uma das opções abaixo:
+                             <h4 className="font-bold text-blue-900 text-sm mb-1">Mínimo de 2 vidas</h4>
+                             <p className="text-blue-800 text-xs mb-3">
+                               Para "2 a 29 vidas", é necessário incluir ao menos 2 beneficiários. <br/>
+                               Se deseja cotar para 1 pessoa:
                              </p>
 
-                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                             <div className="flex flex-col gap-2">
                                 <button 
                                   onClick={switchToPME1}
-                                  className="bg-white hover:bg-blue-50 border border-blue-200 text-blue-800 p-3 rounded-lg shadow-sm transition-colors text-left group"
+                                  className="bg-white hover:bg-blue-50 border border-blue-200 text-blue-800 p-2 rounded-lg shadow-sm transition-colors text-left group"
                                 >
-                                  <span className="text-xs font-bold text-blue-500 uppercase mb-1 block">Sou Titular CNPJ</span>
                                   <div className="flex items-center justify-between">
-                                    <span className="text-sm font-bold">Mudar para CNPJ 1 Vida</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-blue-400 group-hover:text-blue-600">
+                                    <span className="text-xs font-bold uppercase">Mudar para CNPJ 1 Vida</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 text-blue-400 group-hover:text-blue-600">
                                       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                                     </svg>
                                   </div>
@@ -632,12 +630,11 @@ const App: React.FC = () => {
 
                                 <button 
                                   onClick={switchToPF}
-                                  className="bg-white hover:bg-blue-50 border border-blue-200 text-blue-800 p-3 rounded-lg shadow-sm transition-colors text-left group"
+                                  className="bg-white hover:bg-blue-50 border border-blue-200 text-blue-800 p-2 rounded-lg shadow-sm transition-colors text-left group"
                                 >
-                                  <span className="text-xs font-bold text-blue-500 uppercase mb-1 block">Não tenho CNPJ</span>
                                   <div className="flex items-center justify-between">
-                                    <span className="text-sm font-bold">Mudar para Pessoa Física</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-blue-400 group-hover:text-blue-600">
+                                    <span className="text-xs font-bold uppercase">Mudar para Pessoa Física</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 text-blue-400 group-hover:text-blue-600">
                                       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                                     </svg>
                                   </div>
@@ -727,6 +724,7 @@ const App: React.FC = () => {
       {comparisonModalPlans && (
           <ComparisonModal 
             plans={comparisonModalPlans} 
+            userProfile={currentUser}
             onClose={() => setComparisonModalPlans(null)}
             onRemove={() => {}} // Remove functionality disabled/not used in fixed comparison
           />

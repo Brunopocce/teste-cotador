@@ -13,7 +13,7 @@ export const AgeSelector: React.FC<AgeSelectorProps> = ({ range, count, onIncrem
 
   return (
     <div 
-      className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 h-full ${
+      className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 ${
         isActive 
           ? 'bg-blue-50 border-blue-500 shadow-sm ring-1 ring-blue-500' 
           : 'bg-white border-gray-200 hover:border-blue-300'

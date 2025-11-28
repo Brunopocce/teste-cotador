@@ -79,17 +79,17 @@ export const PlanDetailsModal: React.FC<PlanDetailsModalProps> = ({ planOrVarian
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn" onClick={onClose}>
         <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full flex flex-col max-h-[90vh] animate-slideUp" onClick={e => e.stopPropagation()}>
-            <div className={`${basePlan.logoColor} p-6 rounded-t-2xl border-b border-white/10 flex justify-between items-center flex-shrink-0`}>
-                <div>
-                    <h3 className="text-2xl font-bold text-white mb-1">{basePlan.operator}</h3>
-                    <p className="text-lg font-medium text-white/90">{basePlan.name}</p>
-                </div>
-                <button onClick={onClose} className="text-white/70 hover:text-white p-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            {/* Minimalist Header */}
+            <div className={`${basePlan.logoColor} p-3 px-5 rounded-t-2xl border-b border-white/10 flex justify-between items-center flex-shrink-0 shadow-sm`}>
+                <h3 className="text-lg font-bold text-white leading-tight tracking-tight">
+                    {basePlan.name}
+                </h3>
+                <button onClick={onClose} className="text-white/80 hover:text-white p-1.5 rounded-full hover:bg-white/20 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto p-4 space-y-5">
                 <div>
                     <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-2 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-blue-600"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" /></svg>
@@ -138,7 +138,7 @@ export const PlanDetailsModal: React.FC<PlanDetailsModalProps> = ({ planOrVarian
                 <p className="text-[10px] text-gray-400 italic text-center mt-4">* Os valores e condições podem sofrer alterações sem aviso prévio. Consulte o contrato final.</p>
             </div>
             
-            <div className="p-6 border-t border-gray-100 flex-shrink-0">
+            <div className="p-4 border-t border-gray-100 flex-shrink-0">
                 <button onClick={onClose} className="w-full bg-blue-900 text-white font-bold py-3 rounded-xl hover:bg-blue-800 transition-colors shadow-lg shadow-blue-900/20">Fechar</button>
             </div>
         </div>
