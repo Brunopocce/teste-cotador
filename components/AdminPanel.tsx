@@ -66,16 +66,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
     const createdDate = new Date(createdAt);
     
-    // Período de Teste: 7 dias
+    // Lógica:
+    // 1. Teste Grátis = Criação + 7 dias
+    const trialDays = 7;
     const trialDateObj = new Date(createdDate);
-    trialDateObj.setDate(trialDateObj.getDate() + 7);
+    trialDateObj.setDate(trialDateObj.getDate() + trialDays);
     
-    // Duração do Plano (Mensal: 30, Trimestral: 90)
+    // 2. Duração do Plano (Mensal: 30, Trimestral: 90)
     const planDuration = plan === 'quarterly' ? 90 : 30;
     
-    // Expiração Total = Data Criação + 7 dias teste + Duração do Plano
+    // 3. Expiração Total = Criação + 7 dias (teste) + Duração do Plano
+    // O cliente ganha os 7 dias E DEPOIS começa a contar o tempo do plano pago? 
+    // Ou os 7 dias estão inclusos? 
+    // Considerando "Teste Grátis + Plano", geralmente soma-se os períodos.
     const expirationDateObj = new Date(createdDate);
-    expirationDateObj.setDate(expirationDateObj.getDate() + 7 + planDuration);
+    expirationDateObj.setDate(expirationDateObj.getDate() + trialDays + planDuration);
 
     const today = new Date();
     const diffTime = expirationDateObj.getTime() - today.getTime();
@@ -85,7 +90,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     const trialEndDate = trialDateObj.toLocaleDateString('pt-BR');
     const expirationDate = expirationDateObj.toLocaleDateString('pt-BR');
 
-    // Labels e Cores
+    // Labels e Cores de Status (Baseado no vencimento final)
     let statusLabel = `${diffDays} dias restantes`;
     let statusColor = 'bg-green-100 text-green-700';
 
@@ -97,7 +102,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
         statusColor = 'bg-yellow-100 text-yellow-800';
     }
 
-    const planLabel = plan === 'quarterly' ? 'Trimestral' : 'Mensal';
+    const planLabel = plan === 'quarterly' ? 'Trimestral (90d)' : 'Mensal (30d)';
     const planColor = plan === 'quarterly' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700';
 
     return {
@@ -137,7 +142,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                   <th className="p-4">Dados Pessoais</th>
                   <th className="p-4">Contato</th>
                   <th className="p-4 text-center">Plano Escolhido</th>
-                  <th className="p-4 text-center">Validade & Teste</th>
+                  <th className="p-4 text-center">Prazos & Validade</th>
                   <th className="p-4 text-center">Status Acesso</th>
                   <th className="p-4 text-center">Ações</th>
                 </tr>
@@ -173,17 +178,23 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                             <span className={`inline-block px-3 py-1 rounded text-xs font-bold uppercase mb-1 ${details.planColor}`}>
                                 {details.planLabel}
                             </span>
+                            <div className="text-[10px] text-gray-400">+ 7 dias grátis</div>
                         </td>
                         <td className="p-4 text-center align-top">
-                            <div className="flex flex-col items-center gap-1">
+                            <div className="flex flex-col items-center gap-2">
                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${details.statusColor.replace('bg-', 'border-').replace('text-', 'text-')}`}>
                                     {details.statusLabel}
                                 </span>
-                                <div className="text-xs text-gray-700 mt-1">
-                                    <span className="font-bold">Expira:</span> {details.expirationDate}
-                                </div>
-                                <div className="text-[10px] text-gray-400">
-                                    Teste até: {details.trialEndDate}
+                                
+                                <div className="text-xs w-full">
+                                    <div className="flex justify-between gap-3 text-gray-500 border-b border-gray-100 pb-1 mb-1">
+                                        <span>Teste até:</span>
+                                        <span className="font-medium text-gray-700">{details.trialEndDate}</span>
+                                    </div>
+                                    <div className="flex justify-between gap-3 text-gray-500">
+                                        <span>Assinatura até:</span>
+                                        <span className="font-bold text-[#003366]">{details.expirationDate}</span>
+                                    </div>
                                 </div>
                             </div>
                         </td>

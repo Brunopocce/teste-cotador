@@ -83,9 +83,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin, o
               email: formData.email,
               phone: formData.phone,
               status: 'pending', // Default status
-              // We try to insert plan here. If column doesn't exist, it might error if schema is strict,
-              // but saving to metadata (above) is the fail-safe for Auth.
-              // Ideally user has added 'plan' column to 'profiles'.
+              plan: selectedPlan // Ensure plan is saved to profiles table
             }
           ]);
 
